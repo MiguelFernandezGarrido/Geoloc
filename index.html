@@ -48,20 +48,8 @@
         let nombre;
         let latitud;
         let longitud;
-        let arrayGuardado = [];
-
-        // localstorage
-        if (localStorage.getItem('info')) {
-            arrayGuardado = JSON.parse(localStorage.getItem('info'));
-            for (let i = 0; i < lugares.length; i++) {
-                let li = document.createElement('li');
-                li.setAttribute('data-latitud', lugares[i].latitud);
-                li.setAttribute('data-longitud', lugares[i].longitud);
-                crearli(lugares[i].nombre, li);
-                lista.appendChild(li);
-            }
-
-            let initMap = function (latitud, longitud) {
+        
+        let initMap = function (latitud, longitud) {
                 // Creo el mapa
                 const map = new google.maps.Map(mapa, {
                     center: {
@@ -72,87 +60,77 @@
                 });
             }
 
-            // Creo una función para crear un li
-            let crearli = function (nombre, li) {
-                li.innerHTML = nombre;
-                li.setAttribute('data-nombre', nombre);
-                creabotonmostrarmapa(li);
-                creabotoneliminar(li);
-                lista.appendChild(li);
-                // Limpio el input
-                nombreLugar.value = '';
-            }
-            // Compruebo que esté soportada la geolocalización
-            if (navigator.geolocation) {
-                // Funcion para obtener la posicion
-                let obtenerPosicion = function (li) {
-                    navigator.geolocation.getCurrentPosition(function (posicion) {
-                        // Recolecto la latitud y longitud
-                        latitud = posicion.coords.latitude;
-                        longitud = posicion.coords.longitude;
+        // Compruebo que esté soportada la geolocalización
+        if (navigator.geolocation) {
+            // Funcion para obtener la posicion
+            let obtenerPosicion = function (li) {
+                navigator.geolocation.getCurrentPosition(function (posicion) {
+                    // Recolecto la latitud y longitud
+                    latitud = posicion.coords.latitude;
+                    longitud = posicion.coords.longitude;
 
-                        li.setAttribute('data-latitud', latitud);
-                        li.setAttribute('data-longitud', longitud);
-                    });
-                }
-
-                // Añado un evento al botón
-                botonGuardar.addEventListener('click', function () {
-                    // Recolecto el nombre del lugar
-                    nombre = nombreLugar.value;
-
-                    // Compruebo que el nombre no esté vacío
-                    if (nombre != '') {
-                        // Compruebo que el nombre no exista en la lista
-                        if (lista.querySelector('li[data-nombre="' + nombre + '"]') == null) {
-                            // Creo un elemento li
-                            let li = document.createElement('li');
-                            obtenerPosicion(li);
-                            crearli(nombre, li);
-                            // Guardo en el localstorage
-                            arrayGuardado.push({
-                                nombre: nombre,
-                                latitud: latitud,
-                                longitud: longitud
-                            });
-                        } else {
-                            alert('El nombre ya existe');
-                        }
-                    } else {
-                        alert('El nombre no puede estar vacío');
-                    }
+                    li.setAttribute('data-latitud', latitud);
+                    li.setAttribute('data-longitud', longitud);
                 });
+            }
 
-                let creabotonmostrarmapa = function (li) {
-                    // Creo un botón para mostrar el mapa
-                    let botonMostrarMapa = document.createElement('button');
-                    botonMostrarMapa.innerText = 'Mostrar mapa';
-                    botonMostrarMapa.addEventListener('click', function () {
-                        // Vaciar mapa
-                        mapa.innerHTML = '';
-                        // Crear mapa
-                        console.log(latitud, longitud);
-                        initMap(parseFloat(li.getAttribute('data-latitud')), parseFloat(li.getAttribute('data-longitud')));
-                    });
-                    li.appendChild(botonMostrarMapa);
+            // Añado un evento al botón
+            botonGuardar.addEventListener('click', function () {
+                // Recolecto el nombre del lugar
+                nombre = nombreLugar.value;
+
+                // Compruebo que el nombre no esté vacío
+                if (nombre != '') {
+                    // Compruebo que el nombre no exista en la lista
+                    if (lista.querySelector('li[data-nombre="' + nombre + '"]') == null) {
+                        // Creo un elemento li
+                        let li = document.createElement('li');
+                        li.innerText = nombre;
+                        li.setAttribute('data-nombre', nombre);
+
+                        obtenerPosicion(li);
+                        lista.appendChild(li);
+                        creabotonmostrarmapa(li);
+                        creabotoneliminar(li);
+
+                        // Limpio el input
+                        nombreLugar.value = '';
+                    } else {
+                        alert('El nombre ya existe');
+                    }
+                } else {
+                    alert('El nombre no puede estar vacío');
                 }
+            });
 
-                let creabotoneliminar = function (li) {
-                    // Creo un botón para eliminar el elemento
-                    let boton = document.createElement('button');
-                    boton.innerText = 'Eliminar';
+            let creabotonmostrarmapa = function (li) {
+                // Creo un botón para mostrar el mapa
+                let botonMostrarMapa = document.createElement('button');
+                botonMostrarMapa.innerText = 'Mostrar mapa';
+                botonMostrarMapa.addEventListener('click', function () {
+                    // Vaciar mapa
+                    mapa.innerHTML = '';
+                    // Crear mapa
+                    console.log(latitud, longitud);
+                    initMap(parseFloat(li.getAttribute('data-latitud')), parseFloat(li.getAttribute('data-longitud')));
+                });
+                li.appendChild(botonMostrarMapa);
+            }
 
-                    boton.addEventListener('click', function () {
-                        // Elimino el elemento de la lista
-                        li.remove();
-                    });
-                    // Añado el botón a la lista
-                    li.appendChild(boton);
-                }
-            } else {
-                alert('No soporta geolocalización');
+            let creabotoneliminar = function (li) {
+                // Creo un botón para eliminar el elemento
+                let boton = document.createElement('button');
+                boton.innerText = 'Eliminar';
+
+                boton.addEventListener('click', function () {
+                    // Elimino el elemento de la lista
+                    li.remove();
+                });
+                // Añado el botón a la lista
+                li.appendChild(boton);
             }
         } else {
+            alert('No soporta geolocalización');
         }
     </script>
 
