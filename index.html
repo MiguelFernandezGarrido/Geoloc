@@ -5,9 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Geolocalización</title>
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyADXZ_shHHtBpt0qQe24D-aBAXUfPN_-ls&callback=initMap">
-        </script>
+
     <style>
         #map {
             height: 500px;
@@ -36,7 +34,20 @@
         <!-- Mostrar mapa -->
         <div id="map"></div>
     </section>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyADXZ_shHHtBpt0qQe24D-aBAXUfPN_-ls&callback=initMap">
+        </script>
     <script>
+        let initMap = function (latitud, longitud) {
+            // Creo el mapa
+            const map = new google.maps.Map(mapa, {
+                center: {
+                    lat: latitud,
+                    lng: longitud
+                },
+                zoom: 15
+            });
+        }
 
         console.log('Geolocalización soportada');
         // Recolecto los distintos elementos del DOM
@@ -48,20 +59,36 @@
         let nombre;
         let latitud;
         let longitud;
-        
-        let initMap = function (latitud, longitud) {
-                // Creo el mapa
-                const map = new google.maps.Map(mapa, {
-                    center: {
-                        lat: latitud,
-                        lng: longitud
-                    },
-                    zoom: 15
-                });
-            }
+        let arrayGuardado = [];
 
+        // localstorage
+        if (localStorage.getItem('info')) {
+            console.log('Hay datos guardados');
+            arrayGuardado = JSON.parse(localStorage.getItem('info'));
+            for (let i = 0; i < arrayGuardado.length; i++) {
+                let li = document.createElement('li');
+                li.setAttribute('data-latitud', arrayGuardado[i].latitud);
+                li.setAttribute('data-longitud', arrayGuardado[i].longitud);
+                crearli(arrayGuardado[i].nombre, li);
+                lista.appendChild(li);
+            }
+        }
+
+
+
+        // Creo una función para crear un li
+        let crearli = function (nombre, li) {
+            li.innerHTML = nombre;
+            li.setAttribute('data-nombre', nombre);
+            creabotonmostrarmapa(li);
+            creabotoneliminar(li);
+            lista.appendChild(li);
+            // Limpio el input
+            nombreLugar.value = '';
+        }
         // Compruebo que esté soportada la geolocalización
         if (navigator.geolocation) {
+            console.log('Geolocalización soportada');
             // Funcion para obtener la posicion
             let obtenerPosicion = function (li) {
                 navigator.geolocation.getCurrentPosition(function (posicion) {
@@ -78,23 +105,21 @@
             botonGuardar.addEventListener('click', function () {
                 // Recolecto el nombre del lugar
                 nombre = nombreLugar.value;
-
+                console.log("asd");
                 // Compruebo que el nombre no esté vacío
                 if (nombre != '') {
                     // Compruebo que el nombre no exista en la lista
                     if (lista.querySelector('li[data-nombre="' + nombre + '"]') == null) {
                         // Creo un elemento li
                         let li = document.createElement('li');
-                        li.innerText = nombre;
-                        li.setAttribute('data-nombre', nombre);
-
                         obtenerPosicion(li);
-                        lista.appendChild(li);
-                        creabotonmostrarmapa(li);
-                        creabotoneliminar(li);
-
-                        // Limpio el input
-                        nombreLugar.value = '';
+                        crearli(nombre, li);
+                        // Guardo en el localstorage
+                        arrayGuardado.push({
+                            nombre: nombre,
+                            latitud: latitud,
+                            longitud: longitud
+                        });
                     } else {
                         alert('El nombre ya existe');
                     }
