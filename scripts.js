@@ -69,10 +69,11 @@ function obtenerPosicion() {
 
 function getpos(positione) {
     let nombre = document.getElementById('nuevoMarcador');
+    let corrdP = positione.coords;
     let marcador = {
         position: {
-            lat: positione.coords.latitude,
-            lng: positione.coords.longitude
+            lat: corrdP.latitude,
+            lng: corrdP.longitude
         },
         map: mapa,
         title: nombre.value
